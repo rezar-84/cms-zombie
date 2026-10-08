@@ -31,6 +31,7 @@ def main():
     rebuild_parser.add_argument("--uploads", type=str, help="Path to wp-content/uploads directory")
     rebuild_parser.add_argument("--target", type=str, required=True, help="Target directory for the new project")
     rebuild_parser.add_argument("--name", type=str, default="Resurrected App", help="Project name")
+    rebuild_parser.add_argument("--pathway", choices=["astro", "nextjs", "headless"], default="astro", help="Target architecture (default: astro)")
     rebuild_parser.add_argument("--no-sdlc", action="store_true", help="Skip initializing Nuhut SDLC quality gates")
 
     # Command: crawl
@@ -106,8 +107,24 @@ def main():
 
         if args.command == "rebuild":
             target_path = Path(args.target)
-            print(f"[*] Scaffolding modern Astro project in {target_path}...")
-            AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects)
+            pathway = getattr(args, "pathway", "astro")
+            print(f"[*] Scaffolding modern {pathway.upper()} project in {target_path}...")
+
+            if pathway == "nextjs":
+                from .generators.nextjs import NextJsScaffolder
+                NextJsScaffolder.scaffold(target_path, args.name, posts, astro_redirects)
+            elif pathway == "headless":
+                AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects, enable_headless=True)
+            else:
+                AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects, enable_headless=False)
+
+            # Generate Navigation Structure
+            from .navigation.menus import NavigationBuilder
+            nav_data = NavigationBuilder.build_navigation(posts)
+            nav_file = target_path / "src" / "data" / "navigation.json"
+            nav_file.parent.mkdir(parents=True, exist_ok=True)
+            nav_file.write_text(NavigationBuilder.to_json(nav_data), encoding="utf-8")
+            print(f"[+] Reconstructed site navigation ({len(nav_data['header'])} header links).")
 
             if uploads_target:
                 uploads_path = Path(uploads_target)

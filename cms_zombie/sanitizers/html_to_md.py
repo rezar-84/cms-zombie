@@ -80,10 +80,13 @@ class HtmlToMarkdown:
     def to_markdown_document(cls, html_body: str, metadata: Dict[str, Any]) -> str:
         # Step 1: Clean Gutenberg
         clean_step1 = GutenbergCleaner.clean(html_body or "")
-        # Step 2: Clean Shortcodes
-        clean_step2 = ShortcodeCleaner.clean(clean_step1)
-        # Step 3: Convert HTML to Markdown
-        md_body = cls.convert_html_elements(clean_step2)
+        # Step 2: Convert legacy forms to modern serverless forms
+        from ..forms.converter import FormConverter
+        clean_step2 = FormConverter.convert_forms(clean_step1)
+        # Step 3: Clean Shortcodes
+        clean_step3 = ShortcodeCleaner.clean(clean_step2)
+        # Step 4: Convert HTML to Markdown
+        md_body = cls.convert_html_elements(clean_step3)
 
         # Step 4: Build YAML Frontmatter
         frontmatter_lines = ["---"]

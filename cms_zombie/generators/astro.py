@@ -7,7 +7,7 @@ class AstroScaffolder:
     """Scaffolds a modern Astro project with content collections and extracted markdown posts."""
 
     @classmethod
-    def scaffold(cls, target_dir: Path, project_name: str, posts: List[Dict], redirects: Dict[str, str]):
+    def scaffold(cls, target_dir: Path, project_name: str, posts: List[Dict], redirects: Dict[str, str], enable_headless: bool = False):
         target_dir = Path(target_dir)
         src_dir = target_dir / "src"
         content_dir = src_dir / "content"
@@ -75,7 +75,55 @@ export const collections = { blog, pages };
 """
         (content_dir / "config.ts").write_text(content_config, encoding="utf-8")
 
-        # 4. Generate Markdown files for posts and pages
+        # 4. If headless CMS requested, write Decap CMS admin dashboard
+        if enable_headless:
+            admin_dir = public_dir / "admin"
+            admin_dir.mkdir(parents=True, exist_ok=True)
+            admin_html = """<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content Manager — Decap CMS</title>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+</body>
+</html>
+"""
+            (admin_dir / "index.html").write_text(admin_html, encoding="utf-8")
+
+            admin_config = """backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/assets"
+public_folder: "/assets"
+
+collections:
+  - name: "blog"
+    label: "Blog Posts"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Publish Date", name: "date", widget: "datetime"}
+      - {label: "Excerpt", name: "excerpt", widget: "string", required: false}
+      - {label: "Body", name: "body", widget: "markdown"}
+
+  - name: "pages"
+    label: "Pages"
+    folder: "src/content/pages"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Body", name: "body", widget: "markdown"}
+"""
+            (admin_dir / "config.yml").write_text(admin_config, encoding="utf-8")
+
+        # 5. Generate Markdown files for posts and pages
         for p in posts:
             slug = p.get("slug") or f"item-{p.get('id', '0')}"
             post_type = p.get("type", "post")
