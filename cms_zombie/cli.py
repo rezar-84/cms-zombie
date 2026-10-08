@@ -41,6 +41,13 @@ def main():
     crawl_parser.add_argument("--stealth", action="store_true", help="Enable Scrapling stealth mode to bypass Cloudflare/Turnstile")
     crawl_parser.add_argument("--no-sdlc", action="store_true", help="Skip initializing Nuhut SDLC quality gates")
 
+    # Command: view
+    view_parser = subparsers.add_parser("view", help="View migration reporting and progress tracker dashboard")
+    view_parser.add_argument("project", type=str, help="Path to migrated or extracted project directory")
+    view_parser.add_argument("--serve", action="store_true", help="Start local real-time server")
+    view_parser.add_argument("--port", type=int, default=8765, help="Server port (default: 8765)")
+    view_parser.add_argument("--no-browser", action="store_true", help="Do not open browser automatically")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -172,6 +179,22 @@ def main():
             NuhutInitializer.initialize_nuhut(target_path)
 
         print(f"\n[✓] Live site successfully crawled & resurrected at {target_path}!")
+
+    elif args.command == "view":
+        project_path = Path(args.project)
+        if not project_path.exists():
+            sys.stderr.write(f"Error: Project path '{args.project}' does not exist.\n")
+            sys.exit(1)
+
+        from .view.server import ViewServer
+        if args.serve:
+            ViewServer.serve(project_path, port=args.port, open_browser=not args.no_browser)
+        else:
+            report_file = ViewServer.write_static_report(project_path)
+            print(f"[✓] Migration report generated at: {report_file}")
+            if not args.no_browser:
+                import webbrowser
+                webbrowser.open(f"file://{report_file.resolve()}")
 
 if __name__ == "__main__":
     main()

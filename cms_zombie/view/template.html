@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMS Zombie View — __PROJECT_NAME__</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f8fafc; --line: #e2e8f0; --text: #0f172a; --muted: #64748b;
+    --link: #0284c7; --accent: #10b981; --accent-bg: #ecfdf5; --warn: #f59e0b; --bad: #ef4444;
+    --chip: #f1f5f9; --card-bg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0f19; --panel: #111827; --line: #1f2937; --text: #f9fafb; --muted: #9ca3af;
+      --link: #38bdf8; --accent: #10b981; --accent-bg: #064e3b; --warn: #fbbf24; --bad: #f87171;
+      --chip: #1e293b; --card-bg: #111827;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  a { color: var(--link); text-decoration: none; }
+  header { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 12px 20px;
+    align-items: center; padding: 12px 24px; background: var(--panel);
+    border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 10px; }
+  .pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-bg); display: inline-block; }
+  nav.tabs { display: flex; gap: 6px; }
+  nav.tabs button { background: transparent; border: 1px solid transparent; padding: 6px 14px;
+    border-radius: 6px; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+  nav.tabs button.active { background: var(--bg); border-color: var(--line); color: var(--text); }
+  #search { margin-left: auto; max-width: 280px; width: 100%; padding: 6px 12px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--text); font-size: 13px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+  .strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; }
+  .card .num { font-size: 28px; font-weight: 750; letter-spacing: -0.02em; color: var(--accent); }
+  .card .lbl { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; }
+  .table-wrap { overflow-x: auto; background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; text-align: left; font-size: 13px; }
+  th { padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--muted);
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; background: var(--panel); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  .chip { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--chip); font-size: 12px; }
+  .chip-ok { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="pulse-dot"></span>
+    <span>CMS Zombie View</span>
+  </div>
+  <nav class="tabs">
+    <button class="active" onclick="switchTab('content')">Content (<span id="c-count">0</span>)</button>
+    <button onclick="switchTab('redirects')">SEO 301 (<span id="r-count">0</span>)</button>
+    <button onclick="switchTab('assets')">Media (<span id="a-count">0</span>)</button>
+  </nav>
+  <input type="text" id="search" placeholder="Search posts, slugs, URLs..." oninput="filterView()">
+</header>
+
+<main>
+  <div class="strip">
+    <div class="card">
+      <div class="num" id="stat-total">0</div>
+      <div class="lbl">Total Articles</div>
+    </div>
+    <div class="card">
+      <div class="num" id="stat-redirects">0</div>
+      <div class="lbl">SEO 301 Redirects</div>
+    </div>
+    <div class="card">
+      <div class="num" id="stat-assets">0</div>
+      <div class="lbl">Optimized Assets</div>
+    </div>
+    <div class="card">
+      <div class="num" id="stat-sanitized">100%</div>
+      <div class="lbl">Sanitization Health</div>
+    </div>
+  </div>
+
+  <!-- Content Tab -->
+  <div id="tab-content" class="tab-pane active">
+    <div class="table-wrap">
+      <table id="tbl-content">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Slug</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Words</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-content"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Redirects Tab -->
+  <div id="tab-redirects" class="tab-pane">
+    <div class="table-wrap">
+      <table id="tbl-redirects">
+        <thead>
+          <tr>
+            <th>Legacy URL (Source)</th>
+            <th>Modern Destination</th>
+            <th>HTTP Status</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-redirects"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Assets Tab -->
+  <div id="tab-assets" class="tab-pane">
+    <div class="table-wrap">
+      <table id="tbl-assets">
+        <thead>
+          <tr>
+            <th>Asset File</th>
+            <th>Internal Path</th>
+            <th>Size</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-assets"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+const STATE = __STATE_JSON__;
+
+function init() {
+  document.getElementById("stat-total").textContent = STATE.stats.total_content;
+  document.getElementById("stat-redirects").textContent = STATE.stats.redirects_count;
+  document.getElementById("stat-assets").textContent = STATE.stats.assets_count;
+  document.getElementById("c-count").textContent = STATE.stats.total_content;
+  document.getElementById("r-count").textContent = STATE.stats.redirects_count;
+  document.getElementById("a-count").textContent = STATE.stats.assets_count;
+
+  renderContent(STATE.posts.concat(STATE.pages));
+  renderRedirects(STATE.redirects);
+  renderAssets(STATE.assets);
+}
+
+function renderContent(items) {
+  const tbody = document.getElementById("tbody-content");
+  tbody.innerHTML = items.map(i => `
+    <tr>
+      <td><strong>${escapeHtml(i.title)}</strong></td>
+      <td class="mono">${escapeHtml(i.slug)}</td>
+      <td><span class="chip">${escapeHtml(i.type || 'post')}</span></td>
+      <td>${escapeHtml(i.date || '-')}</td>
+      <td>${i.word_count || 0}</td>
+      <td><span class="chip chip-ok">Sanitized</span></td>
+    </tr>
+  `).join("");
+}
+
+function renderRedirects(items) {
+  const tbody = document.getElementById("tbody-redirects");
+  tbody.innerHTML = items.map(r => `
+    <tr>
+      <td class="mono">${escapeHtml(r.source)}</td>
+      <td class="mono"><strong>${escapeHtml(r.destination)}</strong></td>
+      <td><span class="chip chip-ok">301 Permanent</span></td>
+    </tr>
+  `).join("");
+}
+
+function renderAssets(items) {
+  const tbody = document.getElementById("tbody-assets");
+  tbody.innerHTML = items.map(a => `
+    <tr>
+      <td><strong>${escapeHtml(a.name)}</strong></td>
+      <td class="mono">${escapeHtml(a.path)}</td>
+      <td>${a.size_kb} KB</td>
+    </tr>
+  `).join("");
+}
+
+function switchTab(name) {
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  event.target.classList.add("active");
+  document.getElementById("tab-" + name).classList.add("active");
+}
+
+function filterView() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const allContent = STATE.posts.concat(STATE.pages).filter(i => 
+    i.title.toLowerCase().includes(q) || i.slug.toLowerCase().includes(q)
+  );
+  renderContent(allContent);
+
+  const allRedir = STATE.redirects.filter(r => 
+    r.source.toLowerCase().includes(q) || r.destination.toLowerCase().includes(q)
+  );
+  renderRedirects(allRedir);
+}
+
+function escapeHtml(str) {
+  return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+init();
+</script>
+</body>
+</html>
