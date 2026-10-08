@@ -31,7 +31,7 @@ def main():
     rebuild_parser.add_argument("--uploads", type=str, help="Path to wp-content/uploads directory")
     rebuild_parser.add_argument("--target", type=str, required=True, help="Target directory for the new project")
     rebuild_parser.add_argument("--name", type=str, default="Resurrected App", help="Project name")
-    rebuild_parser.add_argument("--pathway", choices=["astro", "nextjs", "headless"], default="astro", help="Target architecture (default: astro)")
+    rebuild_parser.add_argument("--pathway", choices=["astro", "nextjs", "headless", "custom-cms"], default="astro", help="Target architecture (default: astro)")
     rebuild_parser.add_argument("--no-sdlc", action="store_true", help="Skip initializing Nuhut SDLC quality gates")
 
     # Command: crawl
@@ -115,6 +115,10 @@ def main():
                 NextJsScaffolder.scaffold(target_path, args.name, posts, astro_redirects)
             elif pathway == "headless":
                 AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects, enable_headless=True)
+            elif pathway == "custom-cms":
+                from .generators.custom_cms import CustomCmsScaffolder
+                CustomCmsScaffolder.scaffold(target_path, args.name, posts, astro_redirects)
+                print(f"[+] Embedded Custom CMS scaffolded with Prisma schema & static JSON fallbacks.")
             else:
                 AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects, enable_headless=False)
 
