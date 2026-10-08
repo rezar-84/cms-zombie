@@ -1,60 +1,110 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" width="680" height="200" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 180" width="680" height="180" role="img" aria-labelledby="t d">
   <title id="t">CMS Zombie</title>
-  <desc id="d">A robotic zombie hand emerging from a cracked tombstone holding an energy core, beside the word CMS Zombie.</desc>
+  <desc id="d">Modern cyber-zombie mascot emerging from a digital shield, beside bold typography for CMS Zombie.</desc>
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <filter id="aiGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
   <style>
-    .bg-tomb { fill: #2A2D34; stroke: #4F5565; stroke-width: 3; }
-    .crack { stroke: #10B981; stroke-width: 2.5; stroke-linecap: round; fill: none; }
-    .skin { fill: #34D399; stroke: #065F46; stroke-width: 2.5; }
-    .cyber-joint { fill: #1E293B; stroke: #10B981; stroke-width: 2; }
-    .bolt { fill: #F59E0B; }
-    .pulse { fill: #10B981; filter: drop-shadow(0 0 6px #10B981); }
+    .shield-border { stroke: url(#neonGlow); stroke-width: 3.5; fill: url(#shieldGrad); }
+    .bolt-accent { fill: #F59E0B; filter: drop-shadow(0 0 4px #F59E0B); }
+    .head-base { fill: url(#skinGrad); }
+    .plate { fill: #334155; stroke: #475569; stroke-width: 2; }
+    .eye-neon { fill: #06B6D4; filter: url(#aiGlow); }
+    .eye-pupil { fill: #FFFFFF; }
+    .stitch { stroke: #047857; stroke-width: 2.5; stroke-linecap: round; }
     .word-cms { fill: #10B981; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; }
-    .word-zombie { fill: #0F172A; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-weight: 800; letter-spacing: -0.03em; }
-    .tagline { fill: #64748B; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-weight: 500; font-size: 18px; }
+    .word-zombie { fill: #0F172A; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-weight: 850; letter-spacing: -0.03em; }
+    .tagline { fill: #64748B; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-weight: 500; font-size: 17px; letter-spacing: -0.01em; }
+
     @media (prefers-color-scheme: dark) {
-      .bg-tomb { fill: #1E2028; stroke: #3A3F4D; }
       .word-zombie { fill: #F8FAFC; }
       .tagline { fill: #94A3B8; }
     }
   </style>
 
-  <!-- Mascot / Emblem -->
-  <g transform="translate(20 12)">
-    <!-- Tombstone backdrop representing legacy CMS -->
-    <path class="bg-tomb" d="M30 170 L30 65 C30 25 130 25 130 65 L130 170 Z" />
-    <path class="crack" d="M55 45 L65 70 L58 95 L80 125" />
-    <path class="crack" d="M105 55 L95 80 L108 105" />
+  <!-- Mascot Icon Badge -->
+  <g transform="translate(18, 12)">
+    <!-- Hexagonal Shield Foundation -->
+    <polygon class="shield-border" points="78,4 142,38 142,118 78,152 14,118 14,38" />
 
-    <!-- Legacy CMS acronyms on tombstone -->
-    <text x="80" y="65" text-anchor="middle" fill="#64748B" font-size="11" font-family="ui-monospace, monospace" font-weight="700" opacity="0.6">PHP / WP</text>
-    <text x="80" y="80" text-anchor="middle" fill="#64748B" font-size="9" font-family="ui-monospace, monospace" opacity="0.5">DRUPAL 7</text>
+    <!-- Circuit traces on shield -->
+    <path d="M26 48 L46 48 L56 60" fill="none" stroke="#10B981" stroke-width="1.5" opacity="0.4" />
+    <path d="M130 108 L110 108 L100 96" fill="none" stroke="#06B6D4" stroke-width="1.5" opacity="0.4" />
 
-    <!-- Ground dirt mound -->
-    <ellipse cx="80" cy="168" rx="72" ry="16" fill="#18181B" opacity="0.7"/>
+    <!-- Cyber Zombie Head -->
+    <!-- Jaw & Neck -->
+    <path class="head-base" d="M48 94 C48 126 108 126 108 94 Z" />
+    <!-- Main Cranium -->
+    <path class="head-base" d="M44 70 C44 42 112 42 112 70 L112 94 L44 94 Z" />
 
-    <!-- Resurrecting Cyber Zombie Arm reaching upwards -->
-    <!-- Forearm -->
-    <path class="skin" d="M72 165 L66 110 L84 108 L92 165 Z" />
-    <!-- Cybernetic plating on arm -->
-    <rect class="cyber-joint" x="70" y="125" width="16" height="12" rx="3" />
-    <circle cx="78" cy="131" r="2.5" class="pulse" />
+    <!-- Robotic Cyber Cranial Plating (Right Half) -->
+    <path class="plate" d="M78 44 C98 44 112 56 112 72 L112 92 L78 92 Z" />
+    <!-- Cyber Screws / Ports -->
+    <circle cx="86" cy="52" r="2.5" fill="#64748B" />
+    <circle cx="104" cy="62" r="2.5" fill="#64748B" />
 
-    <!-- Palm and Cyber Core -->
-    <ellipse cx="82" cy="98" rx="14" ry="12" class="skin" />
-    <circle cx="82" cy="98" r="6" class="pulse" />
+    <!-- Organic Stitches on Left Side -->
+    <path class="stitch" d="M56 52 L62 62" />
+    <path class="stitch" d="M54 57 L64 57" />
+    <path class="stitch" d="M50 78 L58 84" />
 
-    <!-- Fingers clawing / grasping -->
-    <path class="skin" d="M72 90 C70 75 62 68 64 62 C66 58 72 62 76 74" />
-    <path class="skin" d="M79 88 C80 70 82 56 86 52 C89 49 92 55 90 70" />
-    <path class="skin" d="M87 90 C92 74 100 62 105 60 C108 58 110 65 102 78" />
-    <path class="skin" d="M93 96 C102 90 114 85 118 88 C121 91 115 98 105 102" />
+    <!-- Left Eye (Zombie / Grumpy Stitch) -->
+    <circle cx="62" cy="74" r="6" fill="#047857" />
+    <circle cx="63" cy="73" r="2" fill="#A7F3D0" />
 
-    <!-- Electric AI Spark / Lightning -->
-    <polygon points="86,30 78,50 88,48 80,72 96,44 86,46" class="bolt" />
+    <!-- Right Eye (AI Glowing Cyber Optic) -->
+    <rect x="88" y="68" width="16" height="12" rx="3" fill="#0F172A" stroke="#06B6D4" stroke-width="1.5" />
+    <circle cx="96" cy="74" r="4.5" class="eye-neon" />
+    <circle cx="96" cy="74" r="1.5" class="eye-pupil" />
+
+    <!-- Grin / Tech Mouth -->
+    <path d="M60 104 Q78 114 96 104" fill="none" stroke="#064E3B" stroke-width="3" stroke-linecap="round" />
+    <!-- Teeth -->
+    <rect x="70" y="104" width="4" height="5" rx="1" fill="#F8FAFC" />
+    <rect x="78" y="105" width="4" height="5" rx="1" fill="#F8FAFC" />
+    <rect x="86" y="104" width="4" height="5" rx="1" fill="#F8FAFC" />
+
+    <!-- Electric AI Spark Bolt on Corner -->
+    <polygon points="128,14 118,34 128,32 120,52 138,28 128,30" class="bolt-accent" />
   </g>
 
-  <!-- Typography -->
-  <text class="word-cms" x="185" y="102" font-size="52">&lt;CMS&gt;</text>
-  <text class="word-zombie" x="355" y="102" font-size="64">Zombie</text>
-  <text class="tagline" x="190" y="142">Resurrect Legacy CMS Websites into Modern AI Code</text>
+  <!-- Typography Suite -->
+  <g transform="translate(186, 0)">
+    <!-- CMS Bracketed Tag -->
+    <text class="word-cms" x="0" y="88" font-size="50">&lt;CMS&gt;</text>
+    
+    <!-- Zombie Bold Wordmark -->
+    <text class="word-zombie" x="175" y="88" font-size="64">Zombie</text>
+
+    <!-- Subtitle / Value Proposition -->
+    <text class="tagline" x="4" y="126">Resurrect Legacy CMS Websites into Modern AI Code</text>
+
+    <!-- Tech Badges below tagline -->
+    <g transform="translate(4, 142)">
+      <rect x="0" y="0" width="76" height="18" rx="4" fill="#10B981" opacity="0.15" />
+      <text x="38" y="13" text-anchor="middle" fill="#10B981" font-size="10" font-family="ui-monospace, monospace" font-weight="700">WORDPRESS</text>
+
+      <rect x="84" y="0" width="60" height="18" rx="4" fill="#06B6D4" opacity="0.15" />
+      <text x="114" y="13" text-anchor="middle" fill="#06B6D4" font-size="10" font-family="ui-monospace, monospace" font-weight="700">DRUPAL</text>
+
+      <rect x="152" y="0" width="64" height="18" rx="4" fill="#8B5CF6" opacity="0.15" />
+      <text x="184" y="13" text-anchor="middle" fill="#8B5CF6" font-size="10" font-family="ui-monospace, monospace" font-weight="700">ASTRO AI</text>
+    </g>
+  </g>
 </svg>
