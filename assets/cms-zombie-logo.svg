@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" width="680" height="200" role="img" aria-labelledby="t d">
+  <title id="t">CMS Zombie</title>
+  <desc id="d">A robotic zombie hand emerging from a cracked tombstone holding an energy core, beside the word CMS Zombie.</desc>
+  <style>
+    .bg-tomb { fill: #2A2D34; stroke: #4F5565; stroke-width: 3; }
+    .crack { stroke: #10B981; stroke-width: 2.5; stroke-linecap: round; fill: none; }
+    .skin { fill: #34D399; stroke: #065F46; stroke-width: 2.5; }
+    .cyber-joint { fill: #1E293B; stroke: #10B981; stroke-width: 2; }
+    .bolt { fill: #F59E0B; }
+    .pulse { fill: #10B981; filter: drop-shadow(0 0 6px #10B981); }
+    .word-cms { fill: #10B981; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; }
+    .word-zombie { fill: #0F172A; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-weight: 800; letter-spacing: -0.03em; }
+    .tagline { fill: #64748B; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-weight: 500; font-size: 18px; }
+    @media (prefers-color-scheme: dark) {
+      .bg-tomb { fill: #1E2028; stroke: #3A3F4D; }
+      .word-zombie { fill: #F8FAFC; }
+      .tagline { fill: #94A3B8; }
+    }
+  </style>
+
+  <!-- Mascot / Emblem -->
+  <g transform="translate(20 12)">
+    <!-- Tombstone backdrop representing legacy CMS -->
+    <path class="bg-tomb" d="M30 170 L30 65 C30 25 130 25 130 65 L130 170 Z" />
+    <path class="crack" d="M55 45 L65 70 L58 95 L80 125" />
+    <path class="crack" d="M105 55 L95 80 L108 105" />
+
+    <!-- Legacy CMS acronyms on tombstone -->
+    <text x="80" y="65" text-anchor="middle" fill="#64748B" font-size="11" font-family="ui-monospace, monospace" font-weight="700" opacity="0.6">PHP / WP</text>
+    <text x="80" y="80" text-anchor="middle" fill="#64748B" font-size="9" font-family="ui-monospace, monospace" opacity="0.5">DRUPAL 7</text>
+
+    <!-- Ground dirt mound -->
+    <ellipse cx="80" cy="168" rx="72" ry="16" fill="#18181B" opacity="0.7"/>
+
+    <!-- Resurrecting Cyber Zombie Arm reaching upwards -->
+    <!-- Forearm -->
+    <path class="skin" d="M72 165 L66 110 L84 108 L92 165 Z" />
+    <!-- Cybernetic plating on arm -->
+    <rect class="cyber-joint" x="70" y="125" width="16" height="12" rx="3" />
+    <circle cx="78" cy="131" r="2.5" class="pulse" />
+
+    <!-- Palm and Cyber Core -->
+    <ellipse cx="82" cy="98" rx="14" ry="12" class="skin" />
+    <circle cx="82" cy="98" r="6" class="pulse" />
+
+    <!-- Fingers clawing / grasping -->
+    <path class="skin" d="M72 90 C70 75 62 68 64 62 C66 58 72 62 76 74" />
+    <path class="skin" d="M79 88 C80 70 82 56 86 52 C89 49 92 55 90 70" />
+    <path class="skin" d="M87 90 C92 74 100 62 105 60 C108 58 110 65 102 78" />
+    <path class="skin" d="M93 96 C102 90 114 85 118 88 C121 91 115 98 105 102" />
+
+    <!-- Electric AI Spark / Lightning -->
+    <polygon points="86,30 78,50 88,48 80,72 96,44 86,46" class="bolt" />
+  </g>
+
+  <!-- Typography -->
+  <text class="word-cms" x="185" y="102" font-size="52">&lt;CMS&gt;</text>
+  <text class="word-zombie" x="355" y="102" font-size="64">Zombie</text>
+  <text class="tagline" x="190" y="142">Resurrect Legacy CMS Websites into Modern AI Code</text>
+</svg>

@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# Output migration workspaces & temporary artifacts
+output/
+temp/
+*.sql.gz
+*.tar.gz
+*.zip
+
+# OS artifacts
+.DS_Store
+Thumbs.db

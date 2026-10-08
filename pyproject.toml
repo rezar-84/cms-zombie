@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cms-zombie"
+version = "0.1.0"
+description = "Resurrect legacy CMS websites (WordPress, Drupal, etc.) into high-performance AI-developed applications governed by Nuhut."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Reza", email = "reza@example.com"}
+]
+keywords = [
+    "cms",
+    "migration",
+    "wordpress",
+    "drupal",
+    "ai-sdlc",
+    "astro",
+    "nextjs",
+    "seo"
+]
+dependencies = []
+
+[project.scripts]
+cms-zombie = "cms_zombie.cli:main"
