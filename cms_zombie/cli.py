@@ -16,7 +16,8 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
 
     # Command: extract
-    extract_parser = subparsers.add_parser("extract", help="Extract posts, pages, and metadata from SQL dump or WXR")
+    extract_parser = subparsers.add_parser("extract", help="Extract posts, pages, and metadata from SQL dump, WXR, or archive")
+    extract_parser.add_argument("--archive", type=str, help="Path to cPanel/WP Engine/Plesk backup archive (.tar.gz, .zip, .tar)")
     extract_parser.add_argument("--sql", type=str, help="Path to database.sql dump")
     extract_parser.add_argument("--wxr", type=str, help="Path to WordPress WXR XML export")
     extract_parser.add_argument("--uploads", type=str, help="Path to wp-content/uploads directory")
@@ -24,6 +25,7 @@ def main():
 
     # Command: rebuild
     rebuild_parser = subparsers.add_parser("rebuild", help="Scaffold modern Astro project and initialize Nuhut SDLC gates")
+    rebuild_parser.add_argument("--archive", type=str, help="Path to cPanel/WP Engine/Plesk backup archive (.tar.gz, .zip, .tar)")
     rebuild_parser.add_argument("--sql", type=str, help="Path to database.sql dump")
     rebuild_parser.add_argument("--wxr", type=str, help="Path to WordPress WXR XML export")
     rebuild_parser.add_argument("--uploads", type=str, help="Path to wp-content/uploads directory")
@@ -31,18 +33,48 @@ def main():
     rebuild_parser.add_argument("--name", type=str, default="Resurrected App", help="Project name")
     rebuild_parser.add_argument("--no-sdlc", action="store_true", help="Skip initializing Nuhut SDLC quality gates")
 
+    # Command: crawl
+    crawl_parser = subparsers.add_parser("crawl", help="Crawl a live CMS site via sitemap/URL with optional stealth bypass")
+    crawl_parser.add_argument("--url", type=str, required=True, help="Target website base URL (e.g. https://oldsite.com)")
+    crawl_parser.add_argument("--target", type=str, required=True, help="Target directory for the new project")
+    crawl_parser.add_argument("--name", type=str, default="Resurrected Site", help="Project name")
+    crawl_parser.add_argument("--stealth", action="store_true", help="Enable Scrapling stealth mode to bypass Cloudflare/Turnstile")
+    crawl_parser.add_argument("--no-sdlc", action="store_true", help="Skip initializing Nuhut SDLC quality gates")
+
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         sys.exit(1)
 
+    temp_dir_obj = None
     if args.command in ("extract", "rebuild"):
+        sql_target = args.sql
+        uploads_target = args.uploads
+
+        if args.archive:
+            archive_path = Path(args.archive)
+            if not archive_path.exists():
+                sys.stderr.write(f"Error: Archive {args.archive} not found.\n")
+                sys.exit(1)
+            import tempfile
+            temp_dir_obj = tempfile.TemporaryDirectory()
+            work_dir = Path(temp_dir_obj.name)
+            print(f"[*] Unpacking and inspecting archive: {archive_path.name}...")
+            from .adapters.archives import ArchiveInspector
+            detected = ArchiveInspector.inspect(archive_path, work_dir)
+            if detected["sql"]:
+                sql_target = str(detected["sql"])
+                print(f"[+] Detected SQL dump: {detected['sql'].name}")
+            if detected["uploads"]:
+                uploads_target = str(detected["uploads"])
+                print(f"[+] Detected uploads directory: {detected['uploads']}")
+
         posts = []
-        if args.sql:
-            sql_path = Path(args.sql)
+        if sql_target:
+            sql_path = Path(sql_target)
             if not sql_path.exists():
-                sys.stderr.write(f"Error: SQL file {args.sql} not found.\n")
+                sys.stderr.write(f"Error: SQL file {sql_target} not found.\n")
                 sys.exit(1)
             print(f"[*] Parsing SQL dump: {sql_path.name}...")
             content = sql_path.read_text(encoding="utf-8", errors="ignore")
@@ -58,7 +90,7 @@ def main():
             posts = WxrXmlParser.parse(content)
             print(f"[+] Found {len(posts)} published posts & pages.")
         else:
-            sys.stderr.write("Error: Please provide either --sql or --wxr input.\n")
+            sys.stderr.write("Error: Please provide --archive, --sql, or --wxr input.\n")
             sys.exit(1)
 
         # Generate redirects
@@ -71,8 +103,8 @@ def main():
             print(f"[*] Scaffolding modern Astro project in {target_path}...")
             AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects)
 
-            if args.uploads:
-                uploads_path = Path(args.uploads)
+            if uploads_target:
+                uploads_path = Path(uploads_target)
                 if uploads_path.exists():
                     print(f"[*] Copying and filtering media from {uploads_path}...")
                     copied = MediaAssetManager.copy_original_assets(uploads_path, target_path / "public" / "assets")
@@ -87,6 +119,59 @@ def main():
                     print("[!] Note: Could not auto-run Nuhut installer (run ./install.sh manually).")
 
             print(f"\n[✓] Project successfully resurrected at {target_path}!")
+
+        elif args.command == "extract":
+            out_path = Path(args.out)
+            out_path.mkdir(parents=True, exist_ok=True)
+            from .sanitizers.html_to_md import HtmlToMarkdown
+            for p in posts:
+                slug = p.get("slug") or f"item-{p.get('id', '0')}"
+                md_doc = HtmlToMarkdown.to_markdown_document(p.get("content", ""), p)
+                (out_path / f"{slug}.md").write_text(md_doc, encoding="utf-8")
+            print(f"\n[✓] Extracted {len(posts)} items to {out_path}!")
+
+    elif args.command == "crawl":
+        from .extractors.live_crawler import LiveCrawler
+        base_url = args.url.rstrip("/")
+        sitemap_url = f"{base_url}/sitemap.xml"
+        print(f"[*] Fetching sitemap from {sitemap_url}...")
+        try:
+            sitemap_xml = LiveCrawler.fetch_url(sitemap_url, use_stealth=args.stealth)
+            urls = LiveCrawler.parse_sitemap(sitemap_xml)
+            print(f"[+] Discovered {len(urls)} URLs in sitemap.")
+        except Exception as e:
+            print(f"[!] Could not read sitemap ({e}). Crawling base URL...")
+            urls = [base_url]
+
+        posts = []
+        for u in urls[:50]: # initial crawl batch
+            try:
+                print(f"[*] Crawling {u}...")
+                page_html = LiveCrawler.fetch_url(u, use_stealth=args.stealth)
+                art = LiveCrawler.extract_article_content(page_html, u)
+                if art["title"]:
+                    posts.append({
+                        "title": art["title"],
+                        "slug": art["slug"],
+                        "date": "",
+                        "excerpt": art["description"],
+                        "content": art["content"],
+                        "type": "post"
+                    })
+            except Exception as e:
+                print(f"[!] Failed to fetch {u}: {e}")
+
+        redirect_rules = RedirectManager.generate_redirect_rules(posts)
+        astro_redirects = RedirectManager.to_astro_redirects(redirect_rules)
+
+        target_path = Path(args.target)
+        print(f"[*] Scaffolding modern Astro project in {target_path}...")
+        AstroScaffolder.scaffold(target_path, args.name, posts, astro_redirects)
+
+        if not args.no_sdlc:
+            NuhutInitializer.initialize_nuhut(target_path)
+
+        print(f"\n[✓] Live site successfully crawled & resurrected at {target_path}!")
 
 if __name__ == "__main__":
     main()
