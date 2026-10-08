@@ -18,8 +18,16 @@
 - **Shortcode & Gutenberg Sanitizer**: Strips visual page builder residue (Elementor, Divi, WPBakery / Visual Composer) and Gutenberg comments (`<!-- wp:... -->`) into clean semantic Markdown/MDX with frontmatter.
 - **Automated 301 SEO Defense**: Guarantees zero loss of Google search rankings by computing complete 301 redirect mappings matching every historical permalink structure (`/%year%/%monthnum%/%postname%/`, `/?p=123`).
 - **Media Optimization**: Copies `wp-content/uploads/` while skipping junk auto-generated thumbnail duplicates (`-150x150.jpg`, `-300x200.png`).
-- **Modern Target Scaffolding**: Emits ready-to-run [Astro Content Collections](https://astro.build) with typed Zod schemas.
-- **SDLC Quality Governance**: Automatically binds the newly scaffolded project to Nuhut's quality gates for WCAG 2.2 AA accessibility and URL verification.
+- **Archive Auto-Unpacker**: Transparently inspects and unpacks cPanel (`.tar.gz`), WP Engine (`.zip`), and Plesk (`.tar`) full-host backups.
+- **Live Site Crawler & Scrapling Stealth**: Extracts sitemaps, articles, and meta tags directly from live sites with optional cloudflare-evasion stealth mode.
+- **Multi-Pathway Architecture Scaffolding**:
+  - `--pathway astro`: Zero-JS static content collections with typed Zod schemas.
+  - `--pathway nextjs`: App Router with TypeScript and static MDX generation.
+  - `--pathway headless`: Decap CMS git-backed editorial admin configuration.
+  - `--pathway custom-cms`: Fully self-contained bespoke blog CMS (Vite + React + Tailwind + Prisma SQLite/PostgreSQL schema + in-app multi-mode rich editor + resilient static JSON fallbacks).
+- **Interactive Migration Reporting & Progress Tracker**: `cms-zombie view <project> --serve` launches a live audit dashboard tracking SEO parity, media preservation, and taxonomy completeness.
+- **SDLC Quality Governance**: Automatically binds newly scaffolded projects to Nuhut's quality gates for WCAG 2.2 AA accessibility and URL verification.
+
 
 ---
 
