@@ -43,5 +43,14 @@ class TestCrawler(unittest.TestCase):
         self.assertEqual(data["slug"], "my-awesome-post")
         self.assertIn("Here is the content", data["content"])
 
+    def test_ssrf_protection(self):
+        with self.assertRaises(ValueError) as ctx:
+            LiveCrawler.fetch_url("file:///etc/passwd")
+        self.assertIn("scheme", str(ctx.exception))
+
+        with self.assertRaises(ValueError) as ctx:
+            LiveCrawler.fetch_url("http://169.254.169.254/latest/meta-data/")
+        self.assertIn("SSRF", str(ctx.exception))
+
 if __name__ == "__main__":
     unittest.main()

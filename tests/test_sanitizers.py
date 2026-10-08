@@ -35,5 +35,18 @@ class TestSanitizers(unittest.TestCase):
         self.assertIn("**bold**", doc)
         self.assertIn("[link](https://example.com)", doc)
 
+    def test_security_script_stripping_and_image_rewrite(self):
+        dirty_html = """
+        <p>Real content</p>
+        <script>alert('xss');</script>
+        <iframe src="evil.com"></iframe>
+        <img src="https://oldsite.com/wp-content/uploads/2023/04/photo.jpg" alt="Photo" />
+        """
+        doc = HtmlToMarkdown.to_markdown_document(dirty_html, {"title": "Secure Post"})
+        self.assertNotIn("<script>", doc)
+        self.assertNotIn("alert('xss')", doc)
+        self.assertNotIn("<iframe", doc)
+        self.assertIn("![Photo](/assets/2023/04/photo.jpg)", doc)
+
 if __name__ == "__main__":
     unittest.main()

@@ -19,6 +19,15 @@ class LiveCrawler:
     @classmethod
     def fetch_url(cls, url: str, use_stealth: bool = False, timeout: int = 15) -> str:
         """Fetches HTML from URL. Uses standard library by default; switches to Scrapling if requested."""
+        parsed = urllib.parse.urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError(f"Security: Invalid URL scheme '{parsed.scheme}'. Only HTTP/HTTPS allowed.")
+
+        # Defense against SSRF to cloud metadata / loopback
+        hostname = (parsed.hostname or "").lower()
+        if hostname in ("localhost", "127.0.0.1", "::1", "169.254.169.254", "metadata.google.internal"):
+            raise ValueError(f"Security: SSRF attempt to restricted host '{hostname}' blocked.")
+
         if use_stealth:
             return cls._fetch_with_scrapling(url)
 

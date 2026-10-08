@@ -83,9 +83,8 @@ def main():
             if not sql_path.exists():
                 sys.stderr.write(f"Error: SQL file {sql_target} not found.\n")
                 sys.exit(1)
-            print(f"[*] Parsing SQL dump: {sql_path.name}...")
-            content = sql_path.read_text(encoding="utf-8", errors="ignore")
-            posts = WordPressSqlParser.parse_posts(content)
+            print(f"[*] Parsing SQL dump: {sql_path.name} (with postmeta & SEO correlation)...")
+            posts = WordPressSqlParser.parse_sql_file(str(sql_path), extract_meta=True)
             print(f"[+] Found {len(posts)} published posts & pages.")
         elif args.wxr:
             wxr_path = Path(args.wxr)

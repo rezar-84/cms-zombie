@@ -12,6 +12,9 @@ class HtmlToMarkdown:
         text = html
 
         # Headings: <h1> to <h6>
+        # Security: Strip active executable elements (<script>, <style>, <object>, <embed>, <iframe>)
+        text = re.sub(r"<(?:script|style|object|embed|iframe)[^>]*>.*?</(?:script|style|object|embed|iframe)>", "", text, flags=re.IGNORECASE | re.DOTALL)
+
         for i in range(6, 0, -1):
             pattern = re.compile(rf"<h{i}[^>]*>(.*?)</h{i}>", re.IGNORECASE | re.DOTALL)
             prefix = "#" * i
@@ -37,12 +40,19 @@ class HtmlToMarkdown:
         text = link_pat.sub(r"[\2](\1)", text)
 
         # Images: <img src="url" alt="alt" ...> -> ![alt](url)
+        # Also rewrite legacy wp-content/uploads paths to local /assets/
         def replace_img(match):
             tag = match.group(0)
             src_m = re.search(r'src=["\']([^"\']+)["\']', tag, re.IGNORECASE)
             alt_m = re.search(r'alt=["\']([^"\']*)["\']', tag, re.IGNORECASE)
             src = src_m.group(1) if src_m else ""
             alt = alt_m.group(1) if alt_m else ""
+
+            # Rewrite legacy WP uploads URL to modern local path
+            if "wp-content/uploads/" in src:
+                upload_rel = src.split("wp-content/uploads/")[-1]
+                src = f"/assets/{upload_rel}"
+
             return f"![{alt}]({src})"
 
         text = re.sub(r"<img\s+[^>]*>", replace_img, text, flags=re.IGNORECASE)

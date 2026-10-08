@@ -12,14 +12,21 @@ class ArchiveInspector:
     @classmethod
     def extract_archive(cls, archive_path: Path, dest_dir: Path) -> Path:
         archive_path = Path(archive_path)
-        dest_dir = Path(dest_dir)
-        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest_dir = dest_dir.resolve()
 
         if zipfile.is_zipfile(archive_path):
             with zipfile.ZipFile(archive_path, "r") as zf:
+                for member in zf.infolist():
+                    target_path = (dest_dir / member.filename).resolve()
+                    if not str(target_path).startswith(str(dest_dir)):
+                        raise ValueError(f"Security: Zip-Slip traversal attempt detected in {member.filename}")
                 zf.extractall(dest_dir)
         elif tarfile.is_tarfile(archive_path):
             with tarfile.open(archive_path, "r:*") as tf:
+                for member in tf.getmembers():
+                    target_path = (dest_dir / member.name).resolve()
+                    if not str(target_path).startswith(str(dest_dir)):
+                        raise ValueError(f"Security: Tar traversal attempt detected in {member.name}")
                 tf.extractall(dest_dir)
         else:
             raise ValueError(f"Unsupported archive format: {archive_path.name}")

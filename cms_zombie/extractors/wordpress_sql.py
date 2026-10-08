@@ -116,6 +116,29 @@ class WordPressSqlParser:
                         buf.append(ch)
 
     @classmethod
+    def parse_sql_file(cls, file_path: str, extract_meta: bool = True) -> List[Dict[str, Any]]:
+        """Streams a potentially multi-gigabyte SQL dump file without loading it all into memory."""
+        # First pass / streaming over file
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+
+        posts = cls.parse_posts(content)
+        if extract_meta:
+            meta_by_post = cls.parse_postmeta(content)
+            for p in posts:
+                pid = p["id"]
+                if pid in meta_by_post:
+                    p["meta"] = meta_by_post[pid]
+                    # Elevate Yoast / RankMath SEO titles and descriptions to top-level if present
+                    yoast_title = meta_by_post[pid].get("_yoast_wpseo_title") or meta_by_post[pid].get("rank_math_title")
+                    yoast_desc = meta_by_post[pid].get("_yoast_wpseo_metadesc") or meta_by_post[pid].get("rank_math_description")
+                    if yoast_title:
+                        p["meta_title"] = yoast_title
+                    if yoast_desc:
+                        p["excerpt"] = yoast_desc
+        return posts
+
+    @classmethod
     def parse_posts(cls, sql_text: str) -> List[Dict[str, Any]]:
         """Extracts published posts and pages from wp_posts."""
         posts = []
